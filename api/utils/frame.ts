@@ -37,7 +37,7 @@ export async function configureApp(app: Frog, c: FrameContext): Promise<IClickDa
   const appAuthUrl = env?.APP_AUTH_URL as string
 
   if (!appTitle || !appOwnerFID || Number.isNaN(appOwnerFID) || !pageRedirectUrl || !appAddress || !appPk || !appAuthUrl) {
-    throw new Error('Required environment variables are not defined')
+    throw new Error(`Required environment variables are not defined: ${JSON.stringify(env)}`)
   }
 
   app.metaTags = addMetaTags(appOwnerFID).unstable_metaTags

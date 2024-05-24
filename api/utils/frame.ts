@@ -1,6 +1,8 @@
 import { FrameContext, Frog } from 'frog'
-import { Config, SDK } from '@dappykit/sdk'
+import dappykit from '@dappykit/sdk'
 import { clickcasterLog } from './clickcaster.js'
+
+const { Config, SDK } = dappykit
 
 export interface IClickData {
   appTitle: string
@@ -8,7 +10,7 @@ export interface IClickData {
   fid: number
   url: string
   messageBytes: string
-  dappyKit: SDK
+  dappyKit: InstanceType<typeof SDK>
   appAddress: string
   appPk: `0x${string}`
   appAuthUrl: string

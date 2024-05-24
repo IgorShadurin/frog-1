@@ -1,7 +1,7 @@
 import { Button, Frog } from 'frog'
 import { devtools } from 'frog/dev'
 import { serveStatic } from 'frog/serve-static'
-import { ViemUtils, Utils } from '@dappykit/sdk'
+import dappykit from '@dappykit/sdk'
 import {
   kvDeleteDelegatedToPk,
   kvDeleteMainToDelegated, kvDeleteProof,
@@ -14,6 +14,7 @@ import { configureApp } from './utils/frame.js'
 import { cardStyle, textStyle } from './utils/style.js'
 import { prepareEthAddress } from './utils/eth.js'
 
+const { ViemUtils, Utils } = dappykit
 const {generateMnemonic, privateKeyToAccount, english, mnemonicToAccount} = ViemUtils
 const {accountToSigner} = Utils.Signer
 

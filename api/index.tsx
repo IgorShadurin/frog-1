@@ -1,75 +1,207 @@
-import { Button, Frog, TextInput } from 'frog'
+import { Button, Frog } from 'frog'
 import { devtools } from 'frog/dev'
 import { serveStatic } from 'frog/serve-static'
-// import { neynar } from 'frog/hubs'
-import { handle } from 'frog/vercel'
+import { ViemUtils, Utils } from '@dappykit/sdk'
+import {
+  kvDeleteDelegatedToPk,
+  kvDeleteMainToDelegated, kvDeleteProof,
+  kvGetDelegatedAddress,
+  kvGetMnemonic,
+  kvGetProof,
+  kvPutMnemonic
+} from './utils/kv.ts'
+import { configureApp } from './utils/frame.ts'
+import { cardStyle, textStyle } from './utils/style.ts'
+import { prepareEthAddress } from './utils/eth.ts'
 
-// Uncomment to use Edge Runtime.
-// export const config = {
-//   runtime: 'edge',
-// }
+const {generateMnemonic, privateKeyToAccount, english, mnemonicToAccount} = ViemUtils
+const {accountToSigner} = Utils.Signer
 
 export const app = new Frog({
   assetsPath: '/',
   basePath: '/api',
-  // Supply a Hub to enable frame verification.
-  // hub: neynar({ apiKey: 'NEYNAR_FROG_FM' })
 })
 
-app.frame('/', (c) => {
-  const { buttonValue, inputText, status } = c
-  const fruit = inputText || buttonValue
+app.frame('/', async (c) => {
+  const {appTitle} = await configureApp(app, c)
+
   return c.res({
+    title: appTitle,
     image: (
-      <div
-        style={{
-          alignItems: 'center',
-          background:
-            status === 'response'
-              ? 'linear-gradient(to right, #432889, #17101F)'
-              : 'black',
-          backgroundSize: '100% 100%',
-          display: 'flex',
-          flexDirection: 'column',
-          flexWrap: 'nowrap',
-          height: '100%',
-          justifyContent: 'center',
-          textAlign: 'center',
-          width: '100%',
-        }}
-      >
-        <div
-          style={{
-            color: 'white',
-            fontSize: 60,
-            fontStyle: 'normal',
-            letterSpacing: '-0.025em',
-            lineHeight: 1.4,
-            marginTop: 30,
-            padding: '0 120px',
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          {status === 'response'
-            ? `Nice choice.${fruit ? ` ${fruit.toUpperCase()}!!` : ''}`
-            : 'Welcome!'}
+        <div style={cardStyle}>
+          <div style={textStyle}>
+            {'This is an example of DappyKit integration. Click the "Start" button.'}
+          </div>
         </div>
-      </div>
     ),
     intents: [
-      <TextInput placeholder="Enter custom fruit..." />,
-      <Button value="apples">Apples 1</Button>,
-      <Button value="oranges">Oranges 2</Button>,
-      <Button value="bananas">Bananas 3</Button>,
-      status === 'response' && <Button.Reset>Reset</Button.Reset>,
+      <Button value="start" action="/start">Start</Button>,
     ],
   })
 })
 
-// @ts-ignore
-const isEdgeFunction = typeof EdgeFunction !== 'undefined'
-const isProduction = isEdgeFunction || import.meta.env?.MODE !== 'development'
-devtools(app, isProduction ? { assetsPath: '/.frog' } : { serveStatic })
+app.frame('/start', async (c) => {
+  const {appTitle, userMainAddress} = await configureApp(app, c)
 
-export const GET = handle(app)
-export const POST = handle(app)
+  const userDelegatedAddress = await kvGetDelegatedAddress(c, userMainAddress)
+  let intents = []
+  if (userDelegatedAddress) {
+    intents = [
+      <Button value="info" action="/info">Info</Button>,
+      <Button value="save" action="/save">Save Data</Button>,
+      <Button value="reset-delegated" action="/reset-delegated">Reset Delegated Address</Button>,
+    ]
+  } else {
+    intents = [
+      <Button value="auth-request" action="/auth-request">Auth Request</Button>,
+      <Button.Reset>Back</Button.Reset>,
+    ]
+  }
+
+  return c.res({
+    title: appTitle,
+    image: (
+        <div style={cardStyle}>
+          <div style={textStyle}>
+            {userDelegatedAddress ?
+                'The application is authorized! You can manage user information using the buttons below.' :
+                'This is an example of DappyKit integration. Click "Auth Request" to authorize the app.'}
+          </div>
+        </div>
+    ),
+    intents,
+  })
+})
+
+app.frame('/save', async (c) => {
+  const {userMainAddress, dappyKit, appAddress} = await configureApp(app, c)
+  let storedData = '---'
+  try {
+    const delegatedAddress = await kvGetDelegatedAddress(c, userMainAddress)
+    if (delegatedAddress) {
+      const mnemonic = await kvGetMnemonic(c, delegatedAddress)
+      const proof = await kvGetProof(c, delegatedAddress)
+      if (mnemonic && proof) {
+        storedData = `Data: ${Math.random()}`
+        const appSigner = accountToSigner(mnemonicToAccount(mnemonic))
+        storedData += JSON.stringify(await dappyKit.farcasterClient.saveUserAppData(userMainAddress, appAddress, storedData, proof, appSigner))
+      } else {
+        storedData = 'Mnemonic or proof not found.'
+      }
+    }
+  } catch (e) {
+    storedData = `Error: ${(e as Error).message}`
+  }
+
+  return c.res({
+    image: (
+        <div style={cardStyle}>
+          <div style={textStyle}>
+            {`Data stored. ${storedData}`}
+          </div>
+        </div>
+    ),
+    intents: [
+      <Button.Reset>Back</Button.Reset>
+    ],
+  })
+})
+
+app.frame('/info', async (c) => {
+  const {userMainAddress, dappyKit, appAddress} = await configureApp(app, c)
+
+  let userDelegatedAddress = 'Oops'
+  let storedData = '---'
+  try {
+    const delegatedAddress = await kvGetDelegatedAddress(c, userMainAddress)
+    userDelegatedAddress = delegatedAddress || 'No delegated address found.'
+    if (delegatedAddress) {
+      storedData = await dappyKit.farcasterClient.getDataByAddress(userMainAddress, appAddress)
+    }
+  } catch (e) {
+    userDelegatedAddress = `Error: ${(e as Error).message}`
+  }
+
+  return c.res({
+    image: (
+        <div style={cardStyle}>
+          <div style={textStyle}>
+            {`Delegated address: 0x${userDelegatedAddress}. Stored data: "${storedData}". Nonce: ${(await dappyKit.farcasterClient.getUserInfo(userMainAddress, appAddress)).nonce}.`}
+          </div>
+        </div>
+    ),
+    intents: [
+      <Button.Reset>Back</Button.Reset>
+    ],
+  })
+})
+
+app.frame('/auth-request', async (c) => {
+  let errorText = ''
+  let response
+  const {dappyKit, messageBytes, appPk, appAuthUrl} = await configureApp(app, c)
+
+  try {
+    const appSigner = accountToSigner(privateKeyToAccount(appPk))
+    const userDelegatedMnemonic = generateMnemonic(english)
+    const userDelegatedWallet = mnemonicToAccount(userDelegatedMnemonic)
+    response = await dappyKit.farcasterClient.createAuthRequest(messageBytes, userDelegatedWallet.address, appSigner)
+    if (response.status != 'ok') {
+      throw new Error(`Invalid auth response status. ${JSON.stringify(response)}`)
+    }
+
+    await kvPutMnemonic(c, userDelegatedWallet.address, userDelegatedMnemonic)
+  } catch (e) {
+    console.log('auth request error', (e as Error).message)
+    errorText = `Error: ${(e as Error).message}`
+  }
+
+  return c.res({
+    image: (
+        <div style={cardStyle}>
+          <div style={textStyle}>
+            {errorText && `Error: ${errorText}`}
+            {response?.status === 'ok' && `Open the Auth App and choose the answer: ${response.answer}.`}
+          </div>
+        </div>
+    ),
+    intents: [
+      <Button.Link href={appAuthUrl}>Auth App</Button.Link>,
+      <Button.Reset>Back</Button.Reset>
+    ],
+  })
+})
+
+app.frame('/reset-delegated', async (c) => {
+  const {userMainAddress} = await configureApp(app, c)
+  const userDelegatedAddress = await kvGetDelegatedAddress(c, userMainAddress)
+  await kvDeleteMainToDelegated(c, prepareEthAddress(userMainAddress))
+  await kvDeleteDelegatedToPk(c, userDelegatedAddress)
+  await kvDeleteProof(c, userDelegatedAddress)
+
+  return c.res({
+    image: (
+        <div style={cardStyle}>
+          <div style={textStyle}>
+            {`Delegated Address has been reset. You can issue a new address for this application.`}
+          </div>
+        </div>
+    ),
+    intents: [
+      <Button.Reset>Back</Button.Reset>
+    ],
+  })
+})
+
+const isCloudflareWorker = typeof caches !== 'undefined'
+if (isCloudflareWorker) {
+  // @ts-ignore
+  const manifest = await import('__STATIC_CONTENT_MANIFEST')
+  const serveStaticOptions = {manifest, root: './'}
+  app.use('/*', serveStatic(serveStaticOptions))
+  devtools(app, {assetsPath: '/frog', serveStatic, serveStaticOptions})
+} else {
+  devtools(app, {serveStatic})
+}
+
+export default app

@@ -1,6 +1,6 @@
 import { FrameContext, Frog } from 'frog'
 import { Config, SDK } from '@dappykit/sdk'
-import { clickcasterLog } from './clickcaster.ts'
+import { clickcasterLog } from './clickcaster'
 
 export interface IClickData {
   appTitle: string

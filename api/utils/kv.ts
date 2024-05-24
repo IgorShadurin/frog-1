@@ -1,4 +1,4 @@
-import { prepareEthAddress } from './eth.ts'
+import { prepareEthAddress } from './eth'
 import { Env, FrameContext } from 'frog'
 
 export type KvContext = Env | FrameContext

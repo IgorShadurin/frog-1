@@ -9,10 +9,10 @@ import {
   kvGetMnemonic,
   kvGetProof,
   kvPutMnemonic
-} from './utils/kv.ts'
-import { configureApp } from './utils/frame.ts'
-import { cardStyle, textStyle } from './utils/style.ts'
-import { prepareEthAddress } from './utils/eth.ts'
+} from './utils/kv'
+import { configureApp } from './utils/frame'
+import { cardStyle, textStyle } from './utils/style'
+import { prepareEthAddress } from './utils/eth'
 
 const {generateMnemonic, privateKeyToAccount, english, mnemonicToAccount} = ViemUtils
 const {accountToSigner} = Utils.Signer

@@ -3,7 +3,7 @@ import {
   kvGetMnemonic,
   kvPutDelegatedAddress,
   kvPutProof
-} from './utils/kv.ts'
+} from './utils/kv'
 
 const {generateMnemonic, english} = ViemUtils
 

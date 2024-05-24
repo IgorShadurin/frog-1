@@ -25,7 +25,8 @@ export function addMetaTags(ownerFID: number) {
 }
 
 export async function configureApp(app: Frog, c: FrameContext): Promise<IClickData> {
-  const env = import.meta.env
+  // const env = import.meta.env
+  const env = process.env
   // dummy mnemonic used
   const dappyKit = new SDK(Config.optimismMainnetConfig, 'focus drama print win destroy venue term alter cheese retreat office cannon')
   const appTitle = env?.APP_TITLE as string

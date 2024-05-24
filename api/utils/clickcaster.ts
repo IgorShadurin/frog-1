@@ -1,6 +1,6 @@
 import { ISigner } from '@dappykit/sdk/dist/src/service/delegated-fs/interfaces'
 import { ViemUtils, Utils } from '@dappykit/sdk'
-import { KvContext } from './kv'
+import { KvContext } from './kv.js'
 
 const {privateKeyToAccount} = ViemUtils
 const {accountToSigner} = Utils.Signer

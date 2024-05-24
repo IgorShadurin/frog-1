@@ -1,4 +1,4 @@
-import { prepareEthAddress } from './eth'
+import { prepareEthAddress } from './eth.js'
 import { Env, FrameContext } from 'frog'
 
 export type KvContext = Env | FrameContext

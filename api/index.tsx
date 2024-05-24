@@ -13,12 +13,13 @@ import {
 import { configureApp } from './utils/frame.js'
 import { cardStyle, textStyle } from './utils/style.js'
 import { prepareEthAddress } from './utils/eth.js'
+import { handle } from 'frog/vercel'
 
 const { ViemUtils, Utils } = dappykit
 const {generateMnemonic, privateKeyToAccount, english, mnemonicToAccount} = ViemUtils
 const {accountToSigner} = Utils.Signer
 
-export const app = new Frog({
+const app = new Frog({
   assetsPath: '/',
   basePath: '/api',
 })
@@ -205,4 +206,10 @@ if (isCloudflareWorker) {
   devtools(app, {serveStatic})
 }
 
-export default app
+// @ts-ignore
+const isEdgeFunction = typeof EdgeFunction !== 'undefined'
+const isProduction = isEdgeFunction || import.meta.env?.MODE !== 'development'
+devtools(app, isProduction ? { assetsPath: '/.frog' } : { serveStatic })
+
+export const GET = handle(app)
+export const POST = handle(app)

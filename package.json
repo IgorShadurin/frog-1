@@ -1,5 +1,5 @@
 {
-  "name": "frog-vercel",
+  "name": "dappykit-vercel-frame-example",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,7 @@
     "deploy": "vercel"
   },
   "dependencies": {
+    "@dappykit/sdk": "^2.6.0",
     "frog": "^0.11.4",
     "hono": "^4"
   },
@@ -15,5 +16,8 @@
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
     "vercel": "^32.4.1"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

@@ -1,3 +1,5 @@
+// @ts-ignore
+// todo improve this?
 import { ISigner } from '@dappykit/sdk/dist/src/service/delegated-fs/interfaces'
 import dappykit from '@dappykit/sdk'
 import { KvContext } from './kv.js'

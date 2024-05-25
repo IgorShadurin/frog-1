@@ -25,13 +25,13 @@ export function addMetaTags(ownerFID: number) {
 }
 
 export async function configureApp(app: Frog, c: FrameContext): Promise<IClickData> {
-  // const env = import.meta.env
   const env = process.env
   // dummy mnemonic used
   const dappyKit = new SDK(Config.optimismMainnetConfig, 'focus drama print win destroy venue term alter cheese retreat office cannon')
   const appTitle = env?.APP_TITLE as string
   const appOwnerFID = Number(env?.APP_OWNER_FID)
   const pageRedirectUrl = env?.PAGE_REDIRECT_URL as string
+  // todo get from the PK
   const appAddress = env?.APP_ADDRESS as string
   const appPk = env?.APP_PK as `0x${string}`
   const appAuthUrl = env?.APP_AUTH_URL as string

@@ -15,7 +15,7 @@ import { cardStyle, textStyle } from './utils/style.js'
 import { prepareEthAddress } from './utils/eth.js'
 import { handle } from 'frog/vercel'
 
-const { ViemUtils, Utils } = dappykit
+const {ViemUtils, Utils} = dappykit
 const {generateMnemonic, privateKeyToAccount, english, mnemonicToAccount} = ViemUtils
 const {accountToSigner} = Utils.Signer
 
@@ -45,7 +45,7 @@ app.frame('/', async (c) => {
 app.frame('/start', async (c) => {
   const {appTitle, userMainAddress} = await configureApp(app, c)
 
-  const userDelegatedAddress = await kvGetDelegatedAddress(c, userMainAddress)
+  const userDelegatedAddress = await kvGetDelegatedAddress(userMainAddress)
   let intents = []
   if (userDelegatedAddress) {
     intents = [
@@ -79,10 +79,10 @@ app.frame('/save', async (c) => {
   const {userMainAddress, dappyKit, appAddress} = await configureApp(app, c)
   let storedData = '---'
   try {
-    const delegatedAddress = await kvGetDelegatedAddress(c, userMainAddress)
+    const delegatedAddress = await kvGetDelegatedAddress(userMainAddress)
     if (delegatedAddress) {
-      const mnemonic = await kvGetMnemonic(c, delegatedAddress)
-      const proof = await kvGetProof(c, delegatedAddress)
+      const mnemonic = await kvGetMnemonic(delegatedAddress)
+      const proof = await kvGetProof(delegatedAddress)
       if (mnemonic && proof) {
         storedData = `Data: ${Math.random()}`
         const appSigner = accountToSigner(mnemonicToAccount(mnemonic))
@@ -115,7 +115,7 @@ app.frame('/info', async (c) => {
   let userDelegatedAddress = 'Oops'
   let storedData = '---'
   try {
-    const delegatedAddress = await kvGetDelegatedAddress(c, userMainAddress)
+    const delegatedAddress = await kvGetDelegatedAddress(userMainAddress)
     userDelegatedAddress = delegatedAddress || 'No delegated address found.'
     if (delegatedAddress) {
       storedData = await dappyKit.farcasterClient.getDataByAddress(userMainAddress, appAddress)
@@ -152,7 +152,7 @@ app.frame('/auth-request', async (c) => {
       throw new Error(`Invalid auth response status. ${JSON.stringify(response)}`)
     }
 
-    await kvPutMnemonic(c, userDelegatedWallet.address, userDelegatedMnemonic)
+    await kvPutMnemonic(userDelegatedWallet.address, userDelegatedMnemonic)
   } catch (e) {
     console.log('auth request error', (e as Error).message)
     errorText = `Error: ${(e as Error).message}`
@@ -176,16 +176,18 @@ app.frame('/auth-request', async (c) => {
 
 app.frame('/reset-delegated', async (c) => {
   const {userMainAddress} = await configureApp(app, c)
-  const userDelegatedAddress = await kvGetDelegatedAddress(c, userMainAddress)
-  await kvDeleteMainToDelegated(c, prepareEthAddress(userMainAddress))
-  await kvDeleteDelegatedToPk(c, userDelegatedAddress)
-  await kvDeleteProof(c, userDelegatedAddress)
+  const userDelegatedAddress = await kvGetDelegatedAddress(userMainAddress)
+  if (userDelegatedAddress) {
+    await kvDeleteMainToDelegated(prepareEthAddress(userMainAddress))
+    await kvDeleteDelegatedToPk(userDelegatedAddress)
+    await kvDeleteProof(userDelegatedAddress)
+  }
 
   return c.res({
     image: (
         <div style={cardStyle}>
           <div style={textStyle}>
-            {`Delegated Address has been reset. You can issue a new address for this application.`}
+            {userDelegatedAddress ? `Delegated Address has been reset. You can issue a new address for this application.` : `No delegated address found.`}
           </div>
         </div>
     ),
@@ -209,7 +211,7 @@ if (isCloudflareWorker) {
 // @ts-ignore
 const isEdgeFunction = typeof EdgeFunction !== 'undefined'
 const isProduction = isEdgeFunction || import.meta.env?.MODE !== 'development'
-devtools(app, isProduction ? { assetsPath: '/.frog' } : { serveStatic })
+devtools(app, isProduction ? {assetsPath: '/.frog'} : {serveStatic})
 
 export const GET = handle(app)
 export const POST = handle(app)

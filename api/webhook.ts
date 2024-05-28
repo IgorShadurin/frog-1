@@ -1,10 +1,11 @@
-import { SDK, Config, ViemUtils } from '@dappykit/sdk'
+import dappykit from '@dappykit/sdk'
 import {
   kvGetMnemonic,
   kvPutDelegatedAddress,
   kvPutProof
 } from './utils/kv.js'
 
+const { SDK, Config, ViemUtils } = dappykit
 const {generateMnemonic, english} = ViemUtils
 
 export interface ICallbackResult {
@@ -39,9 +40,9 @@ export default {
         await dappyKit.farcasterClient.checkCallbackData(body, appAddress, authServiceAddress)
 
         // if mnemonic is already stored than we can create a connection between main and delegated addresses
-        if (await kvGetMnemonic(env, body.userDelegatedAddress)) {
-          await kvPutDelegatedAddress(env, body.userMainAddress, body.userDelegatedAddress)
-          await kvPutProof(env, body.userDelegatedAddress, body.proof)
+        if (await kvGetMnemonic(body.userDelegatedAddress)) {
+          await kvPutDelegatedAddress(body.userMainAddress, body.userDelegatedAddress)
+          await kvPutProof(body.userDelegatedAddress, body.proof)
         }
 
         return new Response(JSON.stringify({result: true}), {

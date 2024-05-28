@@ -15,7 +15,7 @@ import { configureApp } from './utils/frame.js'
 import { cardStyle, textStyle } from './utils/style.js'
 import { prepareEthAddress } from './utils/eth.js'
 import { handle } from 'frog/vercel'
-import quiz from '../quiz.json'
+import quiz from '../quiz.json' assert { type: 'json' }
 
 const { ViemUtils, Utils } = dappykit
 const { generateMnemonic, privateKeyToAccount, english, mnemonicToAccount } = ViemUtils

@@ -1,13 +1,15 @@
-import dappykit from '@dappykit/sdk';
+import dappykit from '@dappykit/sdk'
 import {
+  kvDeleteDelegatedToPk,
+  kvDeleteMainToDelegated,
   kvGetMnemonic,
   kvPutDelegatedAddress,
   kvPutProof,
-} from './utils/kv.js';
-import { VercelRequest, VercelResponse } from '@vercel/node';
+} from './utils/kv.js'
+import { VercelRequest, VercelResponse } from '@vercel/node'
 
-const { SDK, Config, ViemUtils } = dappykit;
-const { generateMnemonic, english } = ViemUtils;
+const {SDK, Config} = dappykit
+
 
 export interface ICallbackResult {
   success: boolean;
@@ -20,39 +22,45 @@ export interface ICallbackResult {
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method === 'POST') {
-    const dappyKit = new SDK(Config.optimismMainnetConfig, generateMnemonic(english));
-    const appAddress = process.env.APP_ADDRESS;
-    const authServiceAddress = process.env.AUTH_SERVICE_ADDRESS;
+    const dappyKit = new SDK(Config.optimismMainnetConfig, 'focus drama print win destroy venue term alter cheese retreat office cannon')
+    const appAddress = process.env.APP_ADDRESS
+    const authServiceAddress = process.env.AUTH_SERVICE_ADDRESS
 
     if (!appAddress || !authServiceAddress) {
-      response.status(500).json({ error: 'Environment variables are not set properly.' });
-      return;
+      const error = 'Environment variables are not set properly.'
+      console.error(error)
+      response.status(500).json({error})
+      return
     }
 
     try {
-      const body = request.body as ICallbackResult;
-      if (!body?.success) {
-        // after implementation of error signature move this condition below of `checkCallbackData` to perform kv removing
-        // in the case of not implement do not remove these kvs because anybody can send data
-        // await kvDeleteMainToDelegated(env, body.userMainAddress)
-        // await kvDeleteDelegatedToPk(env, body.userDelegatedAddress)
-        throw new Error('Callback is not successful');
-      }
+      const body = request.body as ICallbackResult
+      console.log('Callback data:', JSON.stringify(body))
 
-      await dappyKit.farcasterClient.checkCallbackData(body, appAddress, authServiceAddress);
+      await dappyKit.farcasterClient.checkCallbackData(body, appAddress, authServiceAddress)
+
+      if (!body?.success) {
+        console.log('Callback is not success. Deleting stored data.')
+        await kvDeleteMainToDelegated(body.userMainAddress)
+        await kvDeleteDelegatedToPk(body.userDelegatedAddress)
+        response.status(200).json({result: true})
+        return
+      }
 
       // if mnemonic is already stored than we can create a connection between main and delegated addresses
       if (await kvGetMnemonic(body.userDelegatedAddress)) {
-        await kvPutDelegatedAddress(body.userMainAddress, body.userDelegatedAddress);
-        await kvPutProof(body.userDelegatedAddress, body.proof);
+        await kvPutDelegatedAddress(body.userMainAddress, body.userDelegatedAddress)
+        await kvPutProof(body.userDelegatedAddress, body.proof)
       }
 
-      response.status(200).json({ result: true });
+      response.status(200).json({result: true})
     } catch (e) {
-      response.status(400).json({ error: 'Invalid JSON or bad request.', message: (e as Error).message });
+      const error = (e as Error).message
+      console.error('Error:', error)
+      response.status(400).json({error})
     }
   } else {
-    response.setHeader('Allow', ['POST']);
-    response.status(405).end(`Method ${request.method} Not Allowed`);
+    response.setHeader('Allow', ['POST'])
+    response.status(405).end(`Method ${request.method} Not Allowed`)
   }
 }

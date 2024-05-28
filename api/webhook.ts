@@ -10,7 +10,6 @@ import { VercelRequest, VercelResponse } from '@vercel/node'
 
 const {SDK, Config} = dappykit
 
-
 export interface ICallbackResult {
   success: boolean;
   requestId: number;
@@ -35,8 +34,6 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
     try {
       const body = request.body as ICallbackResult
-      console.log('Callback data:', JSON.stringify(body))
-
       await dappyKit.farcasterClient.checkCallbackData(body, appAddress, authServiceAddress)
 
       if (!body?.success) {

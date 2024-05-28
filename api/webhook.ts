@@ -1,59 +1,58 @@
-import dappykit from '@dappykit/sdk'
+import dappykit from '@dappykit/sdk';
 import {
   kvGetMnemonic,
   kvPutDelegatedAddress,
-  kvPutProof
-} from './utils/kv.js'
+  kvPutProof,
+} from './utils/kv.js';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-const { SDK, Config, ViemUtils } = dappykit
-const {generateMnemonic, english} = ViemUtils
+const { SDK, Config, ViemUtils } = dappykit;
+const { generateMnemonic, english } = ViemUtils;
 
 export interface ICallbackResult {
-  success: boolean
-  requestId: number
-  userMainAddress: string
-  userDelegatedAddress: string
-  applicationAddress: string
-  proof: string
+  success: boolean;
+  requestId: number;
+  userMainAddress: string;
+  userDelegatedAddress: string;
+  applicationAddress: string;
+  proof: string;
 }
 
-export default {
-  // @ts-ignore
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    if (request.method === 'POST') {
-      const dappyKit = new SDK(Config.optimismMainnetConfig, generateMnemonic(english))
-      // @ts-ignore
-      const appAddress = env.APP_ADDRESS
-      // @ts-ignore
-      const authServiceAddress = env.AUTH_SERVICE_ADDRESS
+export default async function handler(request: VercelRequest, response: VercelResponse) {
+  if (request.method === 'POST') {
+    const dappyKit = new SDK(Config.optimismMainnetConfig, generateMnemonic(english));
+    const appAddress = process.env.APP_ADDRESS;
+    const authServiceAddress = process.env.AUTH_SERVICE_ADDRESS;
 
-      try {
-        const body = (await request.json()) as ICallbackResult
-        if (!body?.success) {
-          // after implementation of error signature move this condition below of `checkCallbackData` to perform kv removing
-          // in the case of not implement do not remove these kvs because anybody can send data
-          // await kvDeleteMainToDelegated(env, body.userMainAddress)
-          // await kvDeleteDelegatedToPk(env, body.userDelegatedAddress)
-          throw new Error('Callback is not successful')
-        }
-
-        await dappyKit.farcasterClient.checkCallbackData(body, appAddress, authServiceAddress)
-
-        // if mnemonic is already stored than we can create a connection between main and delegated addresses
-        if (await kvGetMnemonic(body.userDelegatedAddress)) {
-          await kvPutDelegatedAddress(body.userMainAddress, body.userDelegatedAddress)
-          await kvPutProof(body.userDelegatedAddress, body.proof)
-        }
-
-        return new Response(JSON.stringify({result: true}), {
-          headers: {'Content-Type': 'application/json'},
-          status: 200
-        })
-      } catch (e) {
-        return new Response('Invalid JSON or bad request.', {status: 400, statusText: (e as Error).message})
-      }
-    } else {
-      return new Response('Method Not Allowed', {status: 405})
+    if (!appAddress || !authServiceAddress) {
+      response.status(500).json({ error: 'Environment variables are not set properly.' });
+      return;
     }
-  },
+
+    try {
+      const body = request.body as ICallbackResult;
+      if (!body?.success) {
+        // after implementation of error signature move this condition below of `checkCallbackData` to perform kv removing
+        // in the case of not implement do not remove these kvs because anybody can send data
+        // await kvDeleteMainToDelegated(env, body.userMainAddress)
+        // await kvDeleteDelegatedToPk(env, body.userDelegatedAddress)
+        throw new Error('Callback is not successful');
+      }
+
+      await dappyKit.farcasterClient.checkCallbackData(body, appAddress, authServiceAddress);
+
+      // if mnemonic is already stored than we can create a connection between main and delegated addresses
+      if (await kvGetMnemonic(body.userDelegatedAddress)) {
+        await kvPutDelegatedAddress(body.userMainAddress, body.userDelegatedAddress);
+        await kvPutProof(body.userDelegatedAddress, body.proof);
+      }
+
+      response.status(200).json({ result: true });
+    } catch (e) {
+      response.status(400).json({ error: 'Invalid JSON or bad request.', message: (e as Error).message });
+    }
+  } else {
+    response.setHeader('Allow', ['POST']);
+    response.status(405).end(`Method ${request.method} Not Allowed`);
+  }
 }

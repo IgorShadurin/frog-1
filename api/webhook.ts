@@ -21,6 +21,7 @@ export interface ICallbackResult {
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method === 'POST') {
+    // dummy mnemonic
     const dappyKit = new SDK(Config.optimismMainnetConfig, 'focus drama print win destroy venue term alter cheese retreat office cannon')
     const appAddress = process.env.APP_ADDRESS
     const authServiceAddress = process.env.AUTH_SERVICE_ADDRESS
@@ -58,6 +59,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
     }
   } else {
     response.setHeader('Allow', ['POST'])
-    response.status(405).end(`Method ${request.method} Not Allowed`)
+    response.writeHead(302, { Location: 'https://dappykit.org/?source=frog-vercel-webhook' })
+    response.end()
   }
 }

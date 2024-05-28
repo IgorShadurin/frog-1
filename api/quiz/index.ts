@@ -27,6 +27,10 @@ export class Quiz {
    * @returns Whether the quiz structure is valid.
    */
   static validateQuizStructure(quizStructure: QuizStructure): boolean {
+    if (!quizStructure.questions || quizStructure.questions.length === 0) {
+      return false
+    }
+
     for (const question of quizStructure.questions) {
       if (
         question.answers.length !== Quiz.expectedAnswersCount ||

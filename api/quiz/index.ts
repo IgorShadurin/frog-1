@@ -12,7 +12,7 @@ export class Quiz {
   private questions: Question[]
   private currentQuestionIndex: number = 0
   private points: number = 0
-  private static readonly expectedAnswersCount: number = 4
+  public static readonly expectedAnswersCount: number = 3
 
   constructor(quizStructure: QuizStructure) {
     if (!Quiz.validateQuizStructure(quizStructure)) {

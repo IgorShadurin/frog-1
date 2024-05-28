@@ -1,4 +1,20 @@
-import { Quiz, QuizStructure } from '../api/quiz/index.ts'
+import { Quiz, QuizStructure, Question } from '../api/quiz/index.ts'
+
+function generateQuestion(correctAnswerIndex: number): Question {
+  const numAnswers = Quiz.expectedAnswersCount
+  const question: Question = {
+    question: 'Random question?',
+    answers: [],
+    correctAnswerIndex: correctAnswerIndex,
+  }
+
+  // Generate random answers
+  for (let i = 0; i < numAnswers; i++) {
+    question.answers.push(`Answer ${i + 1}`)
+  }
+
+  return question
+}
 
 describe('Quiz', () => {
   let quizStructure: QuizStructure
@@ -6,16 +22,8 @@ describe('Quiz', () => {
   beforeEach(() => {
     quizStructure = {
       questions: [
-        {
-          question: 'What is the capital of France?',
-          answers: ['Berlin', 'Madrid', 'Paris', 'Rome'],
-          correctAnswerIndex: 2,
-        },
-        {
-          question: 'What is 2 + 2?',
-          answers: ['3', '4', '5', '6'],
-          correctAnswerIndex: 1,
-        },
+        generateQuestion(2), // Correct answer at index 2
+        generateQuestion(1), // Correct answer at index 1
       ],
     }
   })
@@ -27,7 +35,7 @@ describe('Quiz', () => {
   it('should start the quiz', () => {
     const quiz = new Quiz(quizStructure)
     const firstQuestion = quiz.start()
-    expect(firstQuestion.question).toBe('What is the capital of France?')
+    expect(firstQuestion.question).toBe('Random question?')
   })
 
   it('should check correct answer', () => {
@@ -61,26 +69,20 @@ describe('Quiz', () => {
   it('should return false for invalid quiz structure', () => {
     const invalidQuizStructure: QuizStructure = {
       questions: [
-        {
-          question: 'Invalid question?',
-          answers: ['A', 'B', 'C'],
-          correctAnswerIndex: 2,
-        },
+        generateQuestion(1), // Correct answer at index 1
       ],
     }
+    invalidQuizStructure.questions[0].answers.pop() // make the number of answers less than expected
     expect(Quiz.validateQuizStructure(invalidQuizStructure)).toBe(false)
   })
 
   it('should throw error for invalid quiz structure on instantiation', () => {
     const invalidQuizStructure: QuizStructure = {
       questions: [
-        {
-          question: 'Invalid question?',
-          answers: ['A', 'B', 'C'],
-          correctAnswerIndex: 2,
-        },
+        generateQuestion(1), // Correct answer at index 1
       ],
     }
+    invalidQuizStructure.questions[0].answers.pop() // make the number of answers less than expected
     expect(() => new Quiz(invalidQuizStructure)).toThrow('Invalid quiz structure')
   })
 
@@ -156,8 +158,8 @@ describe('Quiz', () => {
       questions: [
         {
           question: 'Invalid question?',
-          answers: ['A', 'B', 'C', 'D'],
-          correctAnswerIndex: 4,
+          answers: ['A', 'B', 'C'],
+          correctAnswerIndex: 3,
         },
       ],
     }
@@ -183,7 +185,7 @@ describe('Quiz', () => {
       questions: [
         {
           question: 'Which one?',
-          answers: ['A', 'A', 'A', 'A'],
+          answers: ['A', 'A', 'A'],
           correctAnswerIndex: 1,
         },
       ],
@@ -207,26 +209,10 @@ describe('Quiz', () => {
   it('should handle quiz with maximum points', () => {
     const maxPointsQuizStructure: QuizStructure = {
       questions: [
-        {
-          question: 'Question 1?',
-          answers: ['A', 'B', 'C', 'D'],
-          correctAnswerIndex: 0,
-        },
-        {
-          question: 'Question 2?',
-          answers: ['A', 'B', 'C', 'D'],
-          correctAnswerIndex: 1,
-        },
-        {
-          question: 'Question 3?',
-          answers: ['A', 'B', 'C', 'D'],
-          correctAnswerIndex: 2,
-        },
-        {
-          question: 'Question 4?',
-          answers: ['A', 'B', 'C', 'D'],
-          correctAnswerIndex: 3,
-        },
+        generateQuestion(0),
+        generateQuestion(1),
+        generateQuestion(2),
+        generateQuestion(1),
       ],
     }
     const quiz = new Quiz(maxPointsQuizStructure)
@@ -237,7 +223,7 @@ describe('Quiz', () => {
     quiz.next()
     quiz.check(2)
     quiz.next()
-    quiz.check(3)
+    quiz.check(1)
     expect(quiz.result()).toBe(8)
   })
 })

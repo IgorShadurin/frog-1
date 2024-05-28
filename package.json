@@ -6,7 +6,7 @@
     "build": "cp -f ./emptyModule.cjs.js ./node_modules/@dappykit/sdk/dist/emptyModule.js && frog vercel-build",
     "dev": "frog dev",
     "deploy": "vercel",
-    "lint:check": "eslint \"api/**/*.ts\" && prettier --check \"api/**/*.ts\"",
+    "lint:check": "eslint \"frame/**/*.ts\" && prettier --check \"api/**/*.ts\"",
     "check:types": "tsc --project tsconfig.json"
   },
   "dependencies": {

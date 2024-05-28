@@ -18,16 +18,17 @@ export interface IClickData {
 
 export function addMetaTags(ownerFID: number) {
   return {
-    unstable_metaTags: [
-      {property: `frame:owner`, content: ownerFID.toString()},
-    ],
+    unstable_metaTags: [{ property: `frame:owner`, content: ownerFID.toString() }],
   }
 }
 
 export async function configureApp(app: Frog, c: FrameContext, browserLocationType = ''): Promise<IClickData> {
   const env = process.env
   // dummy mnemonic used
-  const dappyKit = new SDK(Config.optimismMainnetConfig, 'focus drama print win destroy venue term alter cheese retreat office cannon')
+  const dappyKit = new SDK(
+    Config.optimismMainnetConfig,
+    'focus drama print win destroy venue term alter cheese retreat office cannon',
+  )
   const appTitle = env?.APP_TITLE as string
   const appOwnerFID = Number(env?.APP_OWNER_FID)
   // todo get from the PK
@@ -40,9 +41,10 @@ export async function configureApp(app: Frog, c: FrameContext, browserLocationTy
   }
 
   app.metaTags = addMetaTags(appOwnerFID).unstable_metaTags
+
   if (browserLocationType === 'appAuthUrl') {
     app.browserLocation = appAuthUrl
-  } else{
+  } else {
     app.browserLocation = 'https://dappykit.org/?source=frog-vercel-template'
   }
 
@@ -61,8 +63,8 @@ export async function configureApp(app: Frog, c: FrameContext, browserLocationTy
   try {
     const data = await c.req.json()
     const {
-      trustedData: {messageBytes},
-      untrustedData: {fid, url}
+      trustedData: { messageBytes },
+      untrustedData: { fid, url },
     } = data
     const userMainAddress = await dappyKit.farcasterClient.getCustodyAddress(fid)
     clickcasterLog(c, appPk).then().catch()
@@ -70,8 +72,7 @@ export async function configureApp(app: Frog, c: FrameContext, browserLocationTy
     result.url = url
     result.messageBytes = messageBytes
     result.userMainAddress = userMainAddress
-  } catch (e) {
-  }
+  } catch (e) {}
 
   return result
 }

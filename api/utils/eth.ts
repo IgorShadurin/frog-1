@@ -3,7 +3,7 @@
  * @param address Ethereum address
  */
 export function prepareEthAddress(address: string): string {
-    address = address.replace(/^0x/, '')
+  address = address.replace(/^0x/, '')
 
   return address.toLowerCase()
 }

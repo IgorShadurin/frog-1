@@ -8,28 +8,32 @@ import {
 } from './utils/kv.js'
 import { VercelRequest, VercelResponse } from '@vercel/node'
 
-const {SDK, Config} = dappykit
+const { SDK, Config } = dappykit
 
 export interface ICallbackResult {
-  success: boolean;
-  requestId: number;
-  userMainAddress: string;
-  userDelegatedAddress: string;
-  applicationAddress: string;
-  proof: string;
+  success: boolean
+  requestId: number
+  userMainAddress: string
+  userDelegatedAddress: string
+  applicationAddress: string
+  proof: string
 }
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method === 'POST') {
     // dummy mnemonic
-    const dappyKit = new SDK(Config.optimismMainnetConfig, 'focus drama print win destroy venue term alter cheese retreat office cannon')
+    const dappyKit = new SDK(
+      Config.optimismMainnetConfig,
+      'focus drama print win destroy venue term alter cheese retreat office cannon',
+    )
     const appAddress = process.env.APP_ADDRESS
     const authServiceAddress = process.env.AUTH_SERVICE_ADDRESS
 
     if (!appAddress || !authServiceAddress) {
       const error = 'Environment variables are not set properly.'
-      console.error(error)
-      response.status(500).json({error})
+      console.error(error) // eslint-disable-line no-console
+      response.status(500).json({ error })
+
       return
     }
 
@@ -38,10 +42,11 @@ export default async function handler(request: VercelRequest, response: VercelRe
       await dappyKit.farcasterClient.checkCallbackData(body, appAddress, authServiceAddress)
 
       if (!body?.success) {
-        console.log('Callback is not success. Deleting stored data.')
+        console.log('Callback is not success. Deleting stored data.') // eslint-disable-line no-console
         await kvDeleteMainToDelegated(body.userMainAddress)
         await kvDeleteDelegatedToPk(body.userDelegatedAddress)
-        response.status(200).json({result: true})
+        response.status(200).json({ result: true })
+
         return
       }
 
@@ -51,11 +56,11 @@ export default async function handler(request: VercelRequest, response: VercelRe
         await kvPutProof(body.userDelegatedAddress, body.proof)
       }
 
-      response.status(200).json({result: true})
+      response.status(200).json({ result: true })
     } catch (e) {
       const error = (e as Error).message
-      console.error('Error:', error)
-      response.status(400).json({error})
+      console.error('Error', error) // eslint-disable-line no-console
+      response.status(400).json({ error })
     }
   } else {
     response.setHeader('Allow', ['POST'])

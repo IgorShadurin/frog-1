@@ -112,5 +112,8 @@ export async function kvGetDelegatedAddress(userMainAddress: string): Promise<st
  * @param userDelegatedAddress User delegated address
  */
 export async function kvPutDelegatedAddress(userMainAddress: string, userDelegatedAddress: string): Promise<void> {
-  await kvPutMainToDelegated(prepareEthAddress(userMainAddress), userDelegatedAddress ? prepareEthAddress(userDelegatedAddress) : userDelegatedAddress)
+  await kvPutMainToDelegated(
+    prepareEthAddress(userMainAddress),
+    userDelegatedAddress ? prepareEthAddress(userDelegatedAddress) : userDelegatedAddress,
+  )
 }

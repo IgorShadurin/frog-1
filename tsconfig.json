@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
     "target": "ESNext",
     "module": "NodeNext",
     "skipLibCheck": true,
@@ -18,7 +19,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    "types": ["frog/client"]
+    "types": ["frog/client", "node", "jest"]
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.mtsx"]
 }

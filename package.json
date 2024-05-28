@@ -8,7 +8,7 @@
     "deploy": "vercel"
   },
   "dependencies": {
-    "@dappykit/sdk": "^2.6.0",
+    "@dappykit/sdk": "^2.8.0",
     "@vercel/kv": "^1.0.1",
     "frog": "^0.11.4",
     "hono": "^4"

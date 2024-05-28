@@ -24,24 +24,27 @@ export function addMetaTags(ownerFID: number) {
   }
 }
 
-export async function configureApp(app: Frog, c: FrameContext): Promise<IClickData> {
+export async function configureApp(app: Frog, c: FrameContext, browserLocationType = ''): Promise<IClickData> {
   const env = process.env
   // dummy mnemonic used
   const dappyKit = new SDK(Config.optimismMainnetConfig, 'focus drama print win destroy venue term alter cheese retreat office cannon')
   const appTitle = env?.APP_TITLE as string
   const appOwnerFID = Number(env?.APP_OWNER_FID)
-  const pageRedirectUrl = env?.PAGE_REDIRECT_URL as string
   // todo get from the PK
   const appAddress = env?.APP_ADDRESS as string
   const appPk = env?.APP_PK as `0x${string}`
   const appAuthUrl = env?.APP_AUTH_URL as string
 
-  if (!appTitle || !appOwnerFID || Number.isNaN(appOwnerFID) || !pageRedirectUrl || !appAddress || !appPk || !appAuthUrl) {
+  if (!appTitle || !appOwnerFID || Number.isNaN(appOwnerFID) || !appAddress || !appPk || !appAuthUrl) {
     throw new Error(`Required environment variables are not defined: ${JSON.stringify(env)}`)
   }
 
   app.metaTags = addMetaTags(appOwnerFID).unstable_metaTags
-  app.browserLocation = pageRedirectUrl
+  if (browserLocationType === 'appAuthUrl') {
+    app.browserLocation = appAuthUrl
+  } else{
+    app.browserLocation = 'https://dappykit.org/?source=frog-vercel-template'
+  }
 
   const result: IClickData = {
     dappyKit,

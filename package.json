@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "cp -f ./emptyModule.cjs.js ./node_modules/@dappykit/sdk/dist/emptyModule.js && frog vercel-build",
-    "dev": "frog dev",
+    "prepare": "cp -f ./emptyModule.cjs.js ./node_modules/@dappykit/sdk/dist/emptyModule.js",
+    "build": "npm run prepare && frog vercel-build",
+    "dev": "npm run prepare && frog dev",
     "deploy": "vercel",
     "lint:check": "eslint \"api/**/*.ts\" && prettier --check \"api/**/*.ts\"",
     "check:types": "tsc --project tsconfig.json",

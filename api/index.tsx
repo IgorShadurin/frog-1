@@ -15,10 +15,15 @@ import { configureApp } from './utils/frame.js'
 import { cardStyle, textStyle } from './utils/style.js'
 import { prepareEthAddress } from './utils/eth.js'
 import { handle } from 'frog/vercel'
+import quiz from './quiz.json'
 
 const { ViemUtils, Utils } = dappykit
 const { generateMnemonic, privateKeyToAccount, english, mnemonicToAccount } = ViemUtils
 const { accountToSigner } = Utils.Signer
+
+// todo implement Quiz using the class
+// todo add info about hackathon
+// todo add viral sharing for example for addional points/attempts
 
 const app = new Frog({
   assetsPath: '/',
@@ -26,6 +31,7 @@ const app = new Frog({
 })
 
 app.frame('/', async c => {
+  console.log('quiz', quiz)
   const { appTitle } = await configureApp(app, c)
 
   return c.res({
@@ -210,6 +216,7 @@ app.frame('/reset-delegated', async c => {
   })
 })
 
+// todo duplicate code
 devtools(app, { serveStatic })
 
 // @ts-ignore Vercel info

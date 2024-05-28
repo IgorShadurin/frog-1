@@ -1,4 +1,5 @@
-import dappykit from '@dappykit/sdk'
+// import dappykit from '@dappykit/sdk'
+import { SDK, Config } from '@dappykit/sdk'
 import {
   kvDeleteDelegatedToPk,
   kvDeleteMainToDelegated,
@@ -8,7 +9,7 @@ import {
 } from './utils/kv.js'
 import { VercelRequest, VercelResponse } from '@vercel/node'
 
-const { SDK, Config } = dappykit
+// const { SDK, Config } = dappykit
 
 export interface ICallbackResult {
   success: boolean

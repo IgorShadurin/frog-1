@@ -208,12 +208,7 @@ describe('Quiz', () => {
 
   it('should handle quiz with maximum points', () => {
     const maxPointsQuizStructure: QuizStructure = {
-      questions: [
-        generateQuestion(0),
-        generateQuestion(1),
-        generateQuestion(2),
-        generateQuestion(1),
-      ],
+      questions: [generateQuestion(0), generateQuestion(1), generateQuestion(2), generateQuestion(1)],
     }
     const quiz = new Quiz(maxPointsQuizStructure)
     quiz.start()

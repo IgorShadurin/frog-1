@@ -8,17 +8,26 @@ export interface QuizStructure {
   questions: Question[]
 }
 
+export interface CheckResult {
+  isCorrect: boolean
+  points: number
+  nextQuestionId: number | null
+}
+
 export class Quiz {
-  private questions: Question[]
-  private currentQuestionIndex: number = 0
-  private points: number = 0
+  public questions: Question[]
+  public currentQuestionIndex: number
+  public points: number
   public static readonly expectedAnswersCount: number = 3
 
-  constructor(quizStructure: QuizStructure) {
-    if (!Quiz.validateQuizStructure(quizStructure)) {
-      throw new Error('Invalid quiz structure')
+  constructor(quizStructure: QuizStructure, currentQuestionIndex: number = 0, points: number = 0) {
+    if (quizStructure.questions.length === 0) {
+      throw new Error('Quiz should have at least one question')
     }
+
     this.questions = quizStructure.questions
+    this.currentQuestionIndex = currentQuestionIndex
+    this.points = points
   }
 
   /**
@@ -45,47 +54,20 @@ export class Quiz {
   }
 
   /**
-   * Start the quiz by resetting points and setting the first question as current.
-   * @returns The first question.
-   */
-  start(): Question {
-    this.currentQuestionIndex = 0
-    this.points = 0
-
-    return this.questions[this.currentQuestionIndex]
-  }
-
-  /**
    * Check the answer for the current question.
    * @param answerId - The index of the selected answer.
-   * @returns Whether the answer is correct.
+   * @returns An object with info about correctness, points, and next question ID.
    */
-  check(answerId: number): boolean {
+  check(answerId: number): CheckResult {
     const isCorrect = this.questions[this.currentQuestionIndex].correctAnswerIndex === answerId
     this.points += isCorrect ? 2 : -1
 
-    return isCorrect
-  }
+    const nextQuestionId = this.currentQuestionIndex < this.questions.length - 1 ? this.currentQuestionIndex + 1 : null
 
-  /**
-   * Move to the next question if available.
-   * @returns Whether there is a next question.
-   */
-  next(): boolean {
-    if (this.currentQuestionIndex < this.questions.length - 1) {
-      this.currentQuestionIndex++
-
-      return true
+    return {
+      isCorrect,
+      points: this.points,
+      nextQuestionId,
     }
-
-    return false
-  }
-
-  /**
-   * Get the result of the quiz.
-   * @returns The total points.
-   */
-  result(): number {
-    return this.points
   }
 }

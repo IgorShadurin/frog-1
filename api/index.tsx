@@ -31,14 +31,13 @@ const app = new Frog({
 })
 
 app.frame('/', async c => {
-  console.log('quiz', quiz)
   const { appTitle } = await configureApp(app, c)
 
   return c.res({
     title: appTitle,
     image: (
       <div style={cardStyle}>
-        <div style={textStyle}>{'This is an example of DappyKit integration. Click the "Start" button.'}</div>
+        <div style={textStyle}>{quiz.shortDescription}</div>
       </div>
     ),
     intents: [

@@ -1,6 +1,4 @@
 import { Button, Frog } from 'frog'
-import { devtools } from 'frog/dev'
-import { serveStatic } from 'frog/serve-static'
 import dappykit from '@dappykit/sdk'
 import {
   kvDeleteDelegatedToPk,
@@ -216,12 +214,12 @@ app.frame('/reset-delegated', async c => {
 })
 
 // todo duplicate code
-devtools(app, { serveStatic })
-
+// devtools(app, { serveStatic })
 // @ts-ignore Vercel info
-const isEdgeFunction = typeof EdgeFunction !== 'undefined'
-const isProduction = isEdgeFunction || import.meta.env?.MODE !== 'development'
-devtools(app, isProduction ? { assetsPath: '/.frog' } : { serveStatic })
+// const isEdgeFunction = typeof EdgeFunction !== 'undefined'
+// const isProduction = isEdgeFunction || import.meta.env?.MODE !== 'development'
+// todo remove from prod?
+// devtools(app, isProduction ? { assetsPath: '/.frog' } : { serveStatic })
 
 export const GET = handle(app)
 export const POST = handle(app)

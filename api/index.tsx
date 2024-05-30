@@ -1,5 +1,6 @@
 import { Button, Frog } from 'frog'
-import dappykit from '@dappykit/sdk'
+import { devtools } from 'frog/dev'
+import { serveStatic } from 'frog/serve-static'
 import { configureApp } from './utils/frame.js'
 import { BORDER_FAIL, BORDER_SIMPLE, BORDER_SUCCESS, Box, Heading, Text, VStack } from './utils/style.js'
 import { handle } from 'frog/vercel'
@@ -14,7 +15,7 @@ import { Quiz } from './quiz/index.js'
 // todo add info about hackathon
 // todo add viral sharing for example for addional points/attempts
 
-const app = new Frog({
+export const app = new Frog({
   assetsPath: '/',
   basePath: '/api',
 })
@@ -45,7 +46,6 @@ app.frame('/', async c => {
 
 app.frame('/next', async c => {
   const { appTitle } = await configureApp(app, c)
-
   const buttonData = JSON.parse(c.buttonValue || '{}')
   const questionIndex = buttonData.qi ? Number(buttonData.qi) : 0
   const points = buttonData.p ? Number(buttonData.p) : 0
@@ -57,16 +57,18 @@ app.frame('/next', async c => {
     index,
   }))
   const shuffled = answers.sort(() => Math.random() - 0.5)
-  const intents = shuffled.map(async item => {
-    const newPoints = quiz.check(item.index).points
-    const value = JSON.stringify({ qi: questionIndex + 1, p: newPoints })
+  const intents = await Promise.all(
+    shuffled.map(async item => {
+      const newPoints = quiz.check(item.index).points
+      const value = JSON.stringify({ qi: questionIndex + 1, p: newPoints })
 
-    return (
-      <Button value={value} action={action}>
-        {item.text}
-      </Button>
-    )
-  })
+      return (
+        <Button value={value} action={action}>
+          {item.text}
+        </Button>
+      )
+    }),
+  )
 
   return c.res({
     title: appTitle,
@@ -303,13 +305,15 @@ app.frame('/result', async c => {
 //   })
 // })
 
-// todo duplicate code
-// devtools(app, { serveStatic })
 // @ts-ignore Vercel info
-// const isEdgeFunction = typeof EdgeFunction !== 'undefined'
-// const isProduction = isEdgeFunction || import.meta.env?.MODE !== 'development'
-// todo remove from prod?
-// devtools(app, isProduction ? { assetsPath: '/.frog' } : { serveStatic })
+const isEdgeFunction = typeof EdgeFunction !== 'undefined'
+const isProduction = isEdgeFunction || import.meta.env?.MODE !== 'development'
+
+console.log('isProduction', isProduction) // eslint-disable-line no-console
+
+if (!isProduction) {
+  devtools(app, isProduction ? { assetsPath: '/.frog' } : { serveStatic })
+}
 
 export const GET = handle(app)
 export const POST = handle(app)

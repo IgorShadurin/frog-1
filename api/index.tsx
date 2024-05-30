@@ -26,7 +26,7 @@ export const app = new Frog({
 app.frame('/', async c => {
   const { appTitle } = await configureApp(app, c, 'appAuthUrl')
 
-  const intents = [<Button action="/next">Start</Button>]
+  const intents = [<Button action="/next">⭐ Start</Button>]
 
   return c.res({
     title: appTitle,
@@ -183,7 +183,7 @@ app.frame('/authorize', async c => {
         errorText = `Error: ${error}`
       }
 
-      text = `❓To view the answers, click "Authorize" and enter the number ${response?.answer}.`
+      text = `⚠️To view the answers, click "Authorize" and enter the number ${response?.answer}.`
       intents = [
         <Button.Link href={appAuthUrl}>🐙 Authorize</Button.Link>,
         <Button value="check-status" action="/authorize">

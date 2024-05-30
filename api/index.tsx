@@ -13,9 +13,9 @@ const { ViemUtils, Utils } = dappykit
 const { generateMnemonic, privateKeyToAccount, english, mnemonicToAccount } = ViemUtils
 const { accountToSigner } = Utils.Signer
 
-// todo implement Quiz using the class
 // todo add info about hackathon
-// todo add viral sharing for example for addional points/attempts
+// todo add viral sharing for example for additional points/attempts
+// todo save some data using DappyKit (results for example)
 
 export const app = new Frog({
   assetsPath: '/',
@@ -107,7 +107,7 @@ app.frame('/result', async c => {
     intents.push(<Button action={userDelegatedAddress ? '/answers' : '/authorize'}>🙋 Answers</Button>)
   }
 
-  intents.push(<Button.Link href="https://hack.dappykit.org/?source=quiz-template">🔴 Earn 35-5k OP</Button.Link>)
+  intents.push(<Button.Link href="https://hack.dappykit.org/?source=quiz-template">🔴 Win Tokens</Button.Link>)
 
   return c.res({
     title: appTitle,
@@ -213,57 +213,44 @@ app.frame('/authorize', async c => {
   })
 })
 
-// app.frame('/answers', async c => {
-//   const { appTitle, userMainAddress, dappyKit, appAddress } = await configureApp(app, c, 'appAuthUrl')
-//   const userDelegatedAddress = await kvGetDelegatedAddress(userMainAddress)
-//   let intents = []
-//   let text = ''
-//
-//   if (userDelegatedAddress) {
-//     text = 'The application is authorized! You can manage user information using the buttons below.'
-//     intents = [
-//       <Button value="info" action="/info">
-//         Info
-//       </Button>,
-//       <Button value="save" action="/save">
-//         Save Data
-//       </Button>,
-//       <Button value="reset-delegated" action="/reset-delegated">
-//         Reset Delegated Address
-//       </Button>,
-//     ]
-//   } else {
-//     text = 'This is an example of DappyKit integration. Click "Auth Request" to authorize the app.'
-//     intents = [
-//       <Button value="auth-request" action="/auth-request">
-//         Auth Request
-//       </Button>,
-//       <Button.Reset>Back</Button.Reset>,
-//     ]
-//   }
-//
-//   // todo check is user authorized, if yes, show question-answer one by one
-//
-//   // const intents = [<Button action="/next">Start</Button>]
-//
-//   return c.res({
-//     title: appTitle,
-//     image: (
-//       <Box grow alignVertical="center" backgroundColor="white" padding="32" border={BORDER_SIMPLE}>
-//         <VStack gap="4">
-//           <Heading color="h1Text" align="center" size="64">
-//             Quiz time!
-//           </Heading>
-//
-//           <Text align="center" size="18">
-//             {quizData.shortDescription}
-//           </Text>
-//         </VStack>
-//       </Box>
-//     ),
-//     intents,
-//   })
-// })
+app.frame('/answers', async c => {
+  const { appTitle } = await configureApp(app, c)
+  const questionIndex = c.buttonValue ? Number(c.buttonValue) : 0
+  const quiz = new Quiz(quizData, questionIndex)
+  const isLastQuestion = questionIndex >= quiz.questions.length - 1
+  const intents = []
+
+  if (isLastQuestion) {
+    intents.push(<Button action="/">🏠 Home</Button>)
+  } else {
+    intents.push(
+      <Button value={(questionIndex + 1).toString()} action="/answers">
+        👉 Next
+      </Button>,
+    )
+  }
+
+  return c.res({
+    title: appTitle,
+    image: (
+      <Box grow alignVertical="center" backgroundColor="white" padding="32" border={BORDER_SIMPLE}>
+        <VStack gap="4">
+          <Heading color="h1Text" align="center" size="64">
+            {quiz.questions[questionIndex].question}
+          </Heading>
+
+          <Text align="center" size="32">
+            Answer: {quiz.questions[questionIndex].answers[quiz.questions[questionIndex].correctAnswerIndex]}
+          </Text>
+          <Text align="center" size="18">
+            ID: {questionIndex + 1}/{quiz.questions.length}
+          </Text>
+        </VStack>
+      </Box>
+    ),
+    intents,
+  })
+})
 
 // app.frame('/', async c => {
 //   const { appTitle } = await configureApp(app, c)

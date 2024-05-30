@@ -60,13 +60,12 @@ export class Quiz {
    */
   check(answerId: number): CheckResult {
     const isCorrect = this.questions[this.currentQuestionIndex].correctAnswerIndex === answerId
-    this.points += isCorrect ? 2 : -1
-
+    const points = this.points + (isCorrect ? 1 : 0)
     const nextQuestionId = this.currentQuestionIndex < this.questions.length - 1 ? this.currentQuestionIndex + 1 : null
 
     return {
       isCorrect,
-      points: this.points,
+      points,
       nextQuestionId,
     }
   }

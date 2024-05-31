@@ -9,6 +9,7 @@ The project is configured in Vercel through environment variables. Here is the l
 - `APP_SHARE_URL` - the link to the Frame itself after deployment, needed to share the Quiz with other users.
 - `APP_AUTH_URL` - not required. The link to the authorization Frame. You can provide your own if the standard one doesn't fit.
 - `APP_TITLE` - not required. The title of your application.
+- `KV_NAMESPACE` - not required. A unique namespace for your application. Required only if multiple applications use the same KV storage.
 
 ## Installation
 ```

@@ -199,7 +199,7 @@ app.frame('/authorize', async c => {
       intents = [
         <Button.Link href={appAuthUrl}>🐙 Authorize</Button.Link>,
         <Button value="check-status" action="/authorize">
-          Check Status
+          🔁 Check Status
         </Button>,
       ]
     }

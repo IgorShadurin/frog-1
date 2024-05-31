@@ -160,7 +160,7 @@ app.frame('/authorize', async c => {
       text = `⏳ Waiting...`
       intents = [
         <Button value="check-status" action="/authorize">
-          Check Status
+          🔁 Check Status
         </Button>,
         <Button.Reset>🏠 Home</Button.Reset>,
       ]

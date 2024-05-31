@@ -8,7 +8,7 @@ import { handle } from 'frog/vercel'
 import quizData from '../quiz.json' assert { type: 'json' }
 import { Quiz } from './quiz/index.js'
 import { kvGetDelegatedAddress, kvPutMnemonic } from './utils/kv.js'
-import mainAction from './frame-actions/main.tsx'
+import mainAction from './frame-actions/main.js'
 import nextAction from './frame-actions/next.js'
 import resultAction from './frame-actions/result.js'
 

@@ -14,7 +14,6 @@ const { ViemUtils, Utils } = dappykit
 const { generateMnemonic, privateKeyToAccount, english, mnemonicToAccount } = ViemUtils
 const { accountToSigner } = Utils.Signer
 
-// todo save some data using DappyKit (results for example)
 // todo doc all ENV variables
 
 export const app = new Frog({

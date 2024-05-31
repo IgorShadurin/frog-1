@@ -1,4 +1,3 @@
-// todo improve this?
 // @ts-ignore DappyKit interface
 import { ISigner } from '@dappykit/sdk/dist/src/service/delegated-fs/interfaces'
 import dappykit from '@dappykit/sdk'

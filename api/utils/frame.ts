@@ -3,6 +3,8 @@ import dappykit from '@dappykit/sdk'
 import { clickcasterLog } from './clickcaster.js'
 
 const { Config, SDK } = dappykit
+const { ViemUtils } = dappykit
+const { privateKeyToAccount } = ViemUtils
 
 export interface IClickData {
   appTitle: string
@@ -32,16 +34,15 @@ export async function configureApp(app: Frog, c: FrameContext, browserLocationTy
   )
   const appTitle = env?.APP_TITLE as string
   const appOwnerFID = Number(env?.APP_OWNER_FID)
-  // todo get from the PK
-  const appAddress = env?.APP_ADDRESS as string
   const appPk = env?.APP_PK as `0x${string}`
   const appAuthUrl = env?.APP_AUTH_URL as string
   const appShareUrl = env?.APP_SHARE_URL as string
 
-  if (!appTitle || !appOwnerFID || Number.isNaN(appOwnerFID) || !appAddress || !appPk || !appAuthUrl || !appShareUrl) {
+  if (!appTitle || !appOwnerFID || Number.isNaN(appOwnerFID) || !appPk || !appAuthUrl || !appShareUrl) {
     throw new Error(`Required environment variables are not defined: ${JSON.stringify(env)}`)
   }
 
+  const appAddress = privateKeyToAccount(appPk).address
   app.metaTags = addMetaTags(appOwnerFID).unstable_metaTags
 
   if (browserLocationType === 'appAuthUrl') {

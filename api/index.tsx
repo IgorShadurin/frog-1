@@ -8,6 +8,7 @@ import { handle } from 'frog/vercel'
 import quizData from '../quiz.json' assert { type: 'json' }
 import { Quiz } from './quiz/index.js'
 import { kvGetDelegatedAddress, kvPutMnemonic } from './utils/kv.js'
+import { dappySaveData } from './utils/dappykit.js'
 
 const { ViemUtils, Utils } = dappykit
 const { generateMnemonic, privateKeyToAccount, english, mnemonicToAccount } = ViemUtils
@@ -106,7 +107,7 @@ app.frame('/result', async c => {
   const intents = [<Button action="/">🔁 Again</Button>]
 
   if (!isWin) {
-    // if user authorized direct to answers, if not direct to authorize
+    // if user authorized navigate to answers, if not direct to authorize
     intents.push(<Button action={userDelegatedAddress ? '/answers' : '/authorize'}>🙋 Answers</Button>)
   }
 
@@ -144,7 +145,10 @@ app.frame('/result', async c => {
  * 2. User already sends Auth Request and is waiting for the answer.
  */
 app.frame('/authorize', async c => {
-  const { appTitle, userMainAddress, appAuthUrl, appPk, dappyKit, messageBytes } = await configureApp(app, c)
+  const { appTitle, userMainAddress, appAuthUrl, appPk, dappyKit, messageBytes, appAddress } = await configureApp(
+    app,
+    c,
+  )
   const userDelegatedAddress = await kvGetDelegatedAddress(userMainAddress)
   const isCheckStatus = c.buttonValue === 'check-status'
   let intents = []
@@ -155,6 +159,11 @@ app.frame('/authorize', async c => {
   if (userDelegatedAddress) {
     text = '✅ The application is authorized! You can view the answers.'
     intents = [<Button action={'/answers'}>🙋 Answers</Button>]
+    try {
+      await dappySaveData(dappyKit, appAddress, userMainAddress, 'I was here!')
+    } catch (e) {
+      /* ignore */
+    }
   } else {
     if (isCheckStatus) {
       text = `⏳ Waiting...`

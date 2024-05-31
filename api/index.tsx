@@ -14,6 +14,7 @@ const { generateMnemonic, privateKeyToAccount, english, mnemonicToAccount } = Vi
 const { accountToSigner } = Utils.Signer
 
 // todo save some data using DappyKit (results for example)
+// todo doc all ENV variables
 
 export const app = new Frog({
   assetsPath: '/',
@@ -46,7 +47,7 @@ app.frame('/', async c => {
 })
 
 app.frame('/next', async c => {
-  const { appTitle } = await configureApp(app, c)
+  const { appTitle, appShareUrl } = await configureApp(app, c)
   const buttonData = JSON.parse(c.buttonValue || '{}')
   const questionIndex = buttonData.qi ? Number(buttonData.qi) : 0
   const points = buttonData.p ? Number(buttonData.p) : 0
@@ -58,8 +59,8 @@ app.frame('/next', async c => {
     index,
   }))
   const shuffled = answers.sort(() => Math.random() - 0.5)
-  const intents = await Promise.all(
-    shuffled.map(async item => {
+  const intents = await Promise.all([
+    ...shuffled.map(async item => {
       const newPoints = quiz.check(item.index).points
       const value = JSON.stringify({ qi: questionIndex + 1, p: newPoints })
 
@@ -69,7 +70,8 @@ app.frame('/next', async c => {
         </Button>
       )
     }),
-  )
+    <Button.Link href={appShareUrl}>🔗 Share</Button.Link>,
+  ])
 
   return c.res({
     title: appTitle,

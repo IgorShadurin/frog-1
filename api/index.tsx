@@ -3,18 +3,19 @@ import { devtools } from 'frog/dev'
 import dappykit from '@dappykit/sdk'
 import { serveStatic } from 'frog/serve-static'
 import { configureApp } from './utils/frame.js'
-import { BORDER_FAIL, BORDER_SIMPLE, BORDER_SUCCESS, Box, Heading, Text, vars, VStack } from './utils/style.js'
+import { BORDER_SIMPLE, Box, Heading, Text, vars, VStack } from './utils/style.js'
 import { handle } from 'frog/vercel'
 import quizData from '../quiz.json' assert { type: 'json' }
 import { Quiz } from './quiz/index.js'
 import { kvGetDelegatedAddress, kvPutMnemonic } from './utils/kv.js'
+import mainAction from './frame-actions/main.js'
+import nextAction from './frame-actions/next.js'
+import resultAction from './frame-actions/result.js'
 
 const { ViemUtils, Utils } = dappykit
 const { generateMnemonic, privateKeyToAccount, english, mnemonicToAccount } = ViemUtils
 const { accountToSigner } = Utils.Signer
 
-// todo add info about hackathon
-// todo add viral sharing for example for additional points/attempts
 // todo save some data using DappyKit (results for example)
 
 export const app = new Frog({
@@ -23,115 +24,9 @@ export const app = new Frog({
   ui: { vars },
 })
 
-app.frame('/', async c => {
-  const { appTitle } = await configureApp(app, c, 'appAuthUrl')
-
-  const intents = [<Button action="/next">⭐ Start</Button>]
-
-  return c.res({
-    title: appTitle,
-    image: (
-      <Box grow alignVertical="center" backgroundColor="white" padding="32" border={BORDER_SIMPLE}>
-        <VStack gap="4">
-          <Heading color="h1Text" align="center" size="64">
-            Quiz time!
-          </Heading>
-
-          <Text align="center" size="18">
-            {quizData.shortDescription}
-          </Text>
-        </VStack>
-      </Box>
-    ),
-    intents,
-  })
-})
-
-app.frame('/next', async c => {
-  const { appTitle } = await configureApp(app, c)
-  const buttonData = JSON.parse(c.buttonValue || '{}')
-  const questionIndex = buttonData.qi ? Number(buttonData.qi) : 0
-  const points = buttonData.p ? Number(buttonData.p) : 0
-  const quiz = new Quiz(quizData, questionIndex, points)
-  const isLastQuestion = questionIndex >= quiz.questions.length - 1
-  const action = isLastQuestion ? '/result' : '/next'
-  const answers = quiz.questions[questionIndex].answers.map((item, index) => ({
-    text: item,
-    index,
-  }))
-  const shuffled = answers.sort(() => Math.random() - 0.5)
-  const intents = await Promise.all(
-    shuffled.map(async item => {
-      const newPoints = quiz.check(item.index).points
-      const value = JSON.stringify({ qi: questionIndex + 1, p: newPoints })
-
-      return (
-        <Button value={value} action={action}>
-          {item.text}
-        </Button>
-      )
-    }),
-  )
-
-  return c.res({
-    title: appTitle,
-    image: (
-      <Box grow alignVertical="center" backgroundColor="white" padding="32" border={BORDER_SIMPLE}>
-        <VStack gap="4">
-          <Heading color="h1Text" align="center" size="64">
-            {quiz.questions[questionIndex].question}
-          </Heading>
-          <Text align="center" size="18">
-            Question: {questionIndex + 1}/{quiz.questions.length}
-          </Text>
-        </VStack>
-      </Box>
-    ),
-    intents,
-  })
-})
-
-app.frame('/result', async c => {
-  const { appTitle, userMainAddress } = await configureApp(app, c)
-  const buttonData = JSON.parse(c.buttonValue || '{}')
-  const quiz = new Quiz(quizData)
-  const points = buttonData.p ? Number(buttonData.p) : 0
-  const pointsText = `${points.toString()} of ${quiz.questions.length}`
-  const isWin = points === quiz.questions.length
-  const resultText = isWin ? "That's right! Well done!" : 'You can do better!'
-  const userDelegatedAddress = await kvGetDelegatedAddress(userMainAddress)
-  const intents = [<Button action="/">🔁 Again</Button>]
-
-  if (!isWin) {
-    // if user authorized direct to answers, if not direct to authorize
-    intents.push(<Button action={userDelegatedAddress ? '/answers' : '/authorize'}>🙋 Answers</Button>)
-  }
-
-  intents.push(<Button.Link href="https://hack.dappykit.org/?source=quiz-template">🔴 Win Tokens</Button.Link>)
-
-  return c.res({
-    title: appTitle,
-    image: (
-      <Box
-        grow
-        alignVertical="center"
-        backgroundColor="white"
-        padding="32"
-        border={isWin ? BORDER_SUCCESS : BORDER_FAIL}
-      >
-        <VStack gap="4">
-          <Heading color="h1Text" align="center" size="48">
-            {resultText}
-          </Heading>
-          <Text align="center" size="24">
-            Correct answers: {pointsText}
-          </Text>
-        </VStack>
-      </Box>
-    ),
-    intents,
-  })
-})
+app.frame('/', mainAction)
+app.frame('/next', nextAction)
+app.frame('/result', resultAction)
 
 /**
  * Checks that user already authorized the app and shows him the button to show the answers.

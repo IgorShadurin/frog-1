@@ -9,6 +9,8 @@ import {
 import { VercelRequest, VercelResponse } from '@vercel/node'
 
 const { SDK, Config } = dappykit
+const { ViemUtils } = dappykit
+const { privateKeyToAccount } = ViemUtils
 
 export interface ICallbackResult {
   success: boolean
@@ -26,16 +28,18 @@ export default async function handler(request: VercelRequest, response: VercelRe
       Config.optimismMainnetConfig,
       'focus drama print win destroy venue term alter cheese retreat office cannon',
     )
-    const appAddress = process.env.APP_ADDRESS
+    const appPk = process.env.APP_PK as `0x${string}`
     const authServiceAddress = process.env.AUTH_SERVICE_ADDRESS
 
-    if (!appAddress || !authServiceAddress) {
+    if (!appPk || !authServiceAddress) {
       const error = 'Environment variables are not set properly.'
       console.error(error) // eslint-disable-line no-console
       response.status(500).json({ error })
 
       return
     }
+
+    const appAddress = privateKeyToAccount(appPk).address
 
     try {
       const body = request.body as ICallbackResult

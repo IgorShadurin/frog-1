@@ -4,13 +4,15 @@ import { Env, FrameContext } from 'frog'
 
 export type KvContext = Env | FrameContext
 
+const namespace = process.env.KV_NAMESPACE || 'default'
+
 /**
  * Put data to MainToDelegated KV
  * @param key Key
  * @param value Value
  */
 export async function kvPutMainToDelegated(key: string, value: string): Promise<void> {
-  await kv.set(`mtd_${key}`, value)
+  await kv.set(`mtd_${namespace}_${key}`, value)
 }
 
 /**
@@ -18,7 +20,7 @@ export async function kvPutMainToDelegated(key: string, value: string): Promise<
  * @param key Key
  */
 export async function kvDeleteMainToDelegated(key: string): Promise<void> {
-  await kv.del(`mtd_${key}`)
+  await kv.del(`mtd_${namespace}_${key}`)
 }
 
 /**
@@ -26,7 +28,7 @@ export async function kvDeleteMainToDelegated(key: string): Promise<void> {
  * @param key Key
  */
 export async function kvGetMainToDelegated(key: string): Promise<string | null> {
-  return kv.get(`mtd_${key}`)
+  return kv.get(`mtd_${namespace}_${key}`)
 }
 
 /**
@@ -35,7 +37,7 @@ export async function kvGetMainToDelegated(key: string): Promise<string | null> 
  * @param value Value
  */
 export async function kvPutDelegatedToPk(key: string, value: string): Promise<void> {
-  await kv.set(`dpk_${key}`, value)
+  await kv.set(`dpk_${namespace}_${key}`, value)
 }
 
 /**
@@ -43,7 +45,7 @@ export async function kvPutDelegatedToPk(key: string, value: string): Promise<vo
  * @param key Key
  */
 export async function kvDeleteDelegatedToPk(key: string): Promise<void> {
-  await kv.del(`dpk_${key}`)
+  await kv.del(`dpk_${namespace}_${key}`)
 }
 
 /**
@@ -51,7 +53,7 @@ export async function kvDeleteDelegatedToPk(key: string): Promise<void> {
  * @param key Key
  */
 export async function kvGetDelegatedToPk(key: string): Promise<string | null> {
-  return kv.get(`dpk_${key}`)
+  return kv.get(`dpk_${namespace}_${key}`)
 }
 
 /**

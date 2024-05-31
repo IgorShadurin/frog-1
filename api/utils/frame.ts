@@ -14,6 +14,7 @@ export interface IClickData {
   appAddress: string
   appPk: `0x${string}`
   appAuthUrl: string
+  appShareUrl: string
 }
 
 export function addMetaTags(ownerFID: number) {
@@ -35,8 +36,9 @@ export async function configureApp(app: Frog, c: FrameContext, browserLocationTy
   const appAddress = env?.APP_ADDRESS as string
   const appPk = env?.APP_PK as `0x${string}`
   const appAuthUrl = env?.APP_AUTH_URL as string
+  const appShareUrl = env?.APP_SHARE_URL as string
 
-  if (!appTitle || !appOwnerFID || Number.isNaN(appOwnerFID) || !appAddress || !appPk || !appAuthUrl) {
+  if (!appTitle || !appOwnerFID || Number.isNaN(appOwnerFID) || !appAddress || !appPk || !appAuthUrl || !appShareUrl) {
     throw new Error(`Required environment variables are not defined: ${JSON.stringify(env)}`)
   }
 
@@ -58,6 +60,7 @@ export async function configureApp(app: Frog, c: FrameContext, browserLocationTy
     appAddress,
     appPk,
     appAuthUrl,
+    appShareUrl,
   }
 
   try {
@@ -72,7 +75,9 @@ export async function configureApp(app: Frog, c: FrameContext, browserLocationTy
     result.url = url
     result.messageBytes = messageBytes
     result.userMainAddress = userMainAddress
-  } catch (e) {}
+  } catch (e) {
+    /* empty */
+  }
 
   return result
 }

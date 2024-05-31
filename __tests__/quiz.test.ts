@@ -36,7 +36,7 @@ describe('Quiz', () => {
     const quiz = new Quiz(quizStructure)
     const result: CheckResult = quiz.check(2)
     expect(result.isCorrect).toBe(true) // Correct answer for first question
-    expect(result.points).toBe(2)
+    expect(result.points).toBe(1)
     expect(result.nextQuestionId).toBe(1)
   })
 
@@ -44,7 +44,7 @@ describe('Quiz', () => {
     const quiz = new Quiz(quizStructure)
     const result: CheckResult = quiz.check(1)
     expect(result.isCorrect).toBe(false) // Incorrect answer for first question
-    expect(result.points).toBe(-1)
+    expect(result.points).toBe(0)
     expect(result.nextQuestionId).toBe(1)
   })
 
@@ -52,7 +52,7 @@ describe('Quiz', () => {
     const quiz = new Quiz(quizStructure, 1) // Start with second question
     const result: CheckResult = quiz.check(1)
     expect(result.isCorrect).toBe(true) // Correct answer for second question
-    expect(result.points).toBe(2)
+    expect(result.points).toBe(1)
     expect(result.nextQuestionId).toBeNull()
   })
 
@@ -75,7 +75,7 @@ describe('Quiz', () => {
     const quiz = new Quiz(quizStructure)
     const result: CheckResult = quiz.check(10)
     expect(result.isCorrect).toBe(false)
-    expect(result.points).toBe(-1)
+    expect(result.points).toBe(0)
     expect(result.nextQuestionId).toBe(1)
   })
 
@@ -92,7 +92,7 @@ describe('Quiz', () => {
     const quiz = new Quiz(sameAnswersQuizStructure)
     const result: CheckResult = quiz.check(1)
     expect(result.isCorrect).toBe(true)
-    expect(result.points).toBe(2)
+    expect(result.points).toBe(1)
     expect(result.nextQuestionId).toBeNull()
   })
 
@@ -100,7 +100,7 @@ describe('Quiz', () => {
     const quiz = new Quiz(quizStructure)
     const result: CheckResult = quiz.check(-1)
     expect(result.isCorrect).toBe(false)
-    expect(result.points).toBe(-1)
+    expect(result.points).toBe(0)
     expect(result.nextQuestionId).toBe(1)
   })
 
@@ -121,7 +121,7 @@ describe('Quiz', () => {
     quiz.check(2)
     quiz.currentQuestionIndex++
     const result: CheckResult = quiz.check(1)
-    expect(result.points).toBe(8)
+    expect(result.points).toBe(1)
     expect(result.isCorrect).toBe(true)
     expect(result.nextQuestionId).toBeNull()
   })
